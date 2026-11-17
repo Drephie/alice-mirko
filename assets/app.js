@@ -303,6 +303,7 @@
     if (opened) return;
     if (spun) { spun = false; return; }        /* that tap was the end of a spin, not a press */
     opened = true;
+    startMusic();                              /* inside the tap, or phones refuse to play it */
     var away = rig ? stopSpin() : 0;
     if (away > 12 && !reduced) { window.setTimeout(start, 520); } else start();
   }
@@ -443,6 +444,59 @@
   if (nextBtn) nextBtn.classList.add('nudge');
   update(false);
   layout();
+
+  /* background music (only "la festa continua" has it): fades in on the envelope tap, fades out at the end, plays once */
+  var music = byId('music'), soundBtn = byId('sound'), gain = null, actx = null, muted = false, fadingOut = false;
+  var LEVEL = 0.6, FADE_IN = 4, FADE_OUT = 7;
+  function ramp(to, secs) {
+    if (gain) {
+      var t = actx.currentTime;
+      gain.gain.cancelScheduledValues(t); gain.gain.setValueAtTime(gain.gain.value, t); gain.gain.linearRampToValueAtTime(to, t + secs);
+    } else {   /* no Web Audio: step the element's own volume (iPhones ignore it, so they just play) */
+      var from = music.volume, t0 = performance.now();
+      window.clearInterval(music._fade);
+      music._fade = window.setInterval(function () {
+        var q = Math.min(1, (performance.now() - t0) / (secs * 1000));
+        music.volume = from + (to - from) * q;
+        if (q >= 1) window.clearInterval(music._fade);
+      }, 50);
+    }
+  }
+  function startMusic() {
+    if (!music) return;
+    try {
+      if (navigator.audioSession) navigator.audioSession.type = 'playback';   /* iPhone: play even with the silent switch on, like a video */
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) {
+        actx = new AC(); gain = actx.createGain(); gain.gain.value = 0;
+        actx.createMediaElementSource(music).connect(gain); gain.connect(actx.destination);
+        if (actx.resume) actx.resume();
+      } else music.volume = 0;
+    } catch (err) { gain = null; music.volume = 0; }
+    var p = music.play();
+    if (p && p.catch) p.catch(function (e) { if (e && e.name === 'NotAllowedError' && soundBtn) soundBtn.hidden = true; });   /* only a real refusal hides the switch; a pause from switching apps does not */
+    ramp(LEVEL, FADE_IN);
+    if (soundBtn) soundBtn.hidden = false;
+  }
+  if (music) {
+    music.addEventListener('timeupdate', function () {
+      var left = music.duration - music.currentTime;
+      if (!fadingOut && left <= FADE_OUT) { fadingOut = true; if (!muted) ramp(0, Math.max(0.5, left - 0.2)); }
+    });
+    music.addEventListener('ended', function () { if (soundBtn) soundBtn.hidden = true; });
+    /* switching to another app pauses it; coming back carries on, unless they muted it */
+    document.addEventListener('visibilitychange', function () {
+      if (!opened || music.ended) return;
+      if (document.hidden) music.pause(); else if (!muted) music.play();
+    });
+  }
+  if (soundBtn) soundBtn.addEventListener('click', function () {
+    muted = !muted;
+    soundBtn.setAttribute('aria-pressed', String(muted));
+    soundBtn.setAttribute('aria-label', muted ? 'Attiva la musica' : 'Disattiva la musica');
+    if (muted) { ramp(0, 0.4); window.setTimeout(function () { if (muted) music.pause(); }, 450); }
+    else { music.play(); ramp(fadingOut ? 0 : LEVEL, 1); }
+  });
 
   /* "Copia IBAN": copies the number and shows a tick on the button for a moment */
   function copyText(text) {

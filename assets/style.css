@@ -508,6 +508,26 @@ img { display: block; max-width: 100%; height: auto; }
   .js.spread .pg-next { right: calc(50% - var(--pw) - 84px); }
 }
 
+/* the music switch, bottom-right, only on the page that has music */
+.sound {
+  position: fixed; z-index: 11; right: calc(14px + env(safe-area-inset-right)); bottom: calc(19px + env(safe-area-inset-bottom));
+  width: 40px; height: 40px; padding: 0; border-radius: 50%;
+  display: grid; place-items: center; color: var(--paper); cursor: pointer;
+  background: rgba(44, 47, 33, 0.74); border: 1px solid rgba(214, 186, 120, 0.32);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2); backdrop-filter: blur(10px) saturate(1.2);
+  box-shadow: 0 6px 18px -6px rgba(15, 17, 8, 0.6);
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  opacity: 0; visibility: hidden; transition: opacity 0.5s ease, visibility 0s linear 0.5s, transform 160ms ease-out;
+}
+.js.is-open .sound:not([hidden]) { opacity: 1; visibility: visible; transition-delay: 0.15s, 0s, 0s; }
+.sound svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.sound .off, .sound[aria-pressed="true"] .on { display: none; }
+.sound[aria-pressed="true"] .off { display: inline; }
+.sound:active { transform: scale(0.94); }
+.sound:focus-visible { outline: 2px solid var(--paper); outline-offset: 3px; }
+@media (min-width: 860px) { .sound { bottom: 16px; right: 18px; } }
+@media (max-width: 380px) { .js .pager { gap: 8px; } .sound { right: calc(9px + env(safe-area-inset-right)); } }   /* keeps clear of the next arrow on small phones */
+
 /* gold sprigs, drawn in line, in two opposite corners of the ground */
 .flora { display: none; }
 .js .flora { display: block; position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
