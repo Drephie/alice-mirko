@@ -444,17 +444,37 @@
   update(false);
   layout();
 
-  /* "Copia IBAN": copies the number and says so on the button for a moment */
+  /* "Copia IBAN": copies the number and shows a tick on the button for a moment */
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text).catch(function () { return legacyCopy(text); });
+    return legacyCopy(text);
+  }
+  function legacyCopy(text) {
+    return new Promise(function (ok, no) {   /* older phones, or a refused clipboard: copy through a hidden field */
+      var t = document.createElement('textarea');
+      t.value = text; t.setAttribute('readonly', ''); t.style.cssText = 'position:fixed;opacity:0;-webkit-user-select:text;user-select:text';
+      document.body.appendChild(t); t.select(); t.setSelectionRange(0, text.length);
+      var done = false; try { done = document.execCommand('copy'); } catch (err) {}
+      document.body.removeChild(t); done ? ok() : no();
+    });
+  }
   book.addEventListener('click', function (e) {
     var b = e.target.closest ? e.target.closest('.copy') : null;
-    if (!b || !navigator.clipboard) return;
-    navigator.clipboard.writeText(b.getAttribute('data-copy')).then(function () {
-      var label = b.textContent;
-      b.textContent = b.getAttribute('data-done');
+    if (!b) return;
+    var label = b.querySelector('span');
+    copyText(b.getAttribute('data-copy')).then(function () {
+      if (!b.dataset.label) b.dataset.label = label.textContent;
+      label.textContent = b.getAttribute('data-done');
+      b.classList.add('copied');
       if (status) status.textContent = 'IBAN copiato';
-      window.setTimeout(function () { b.textContent = label; }, 1800);
+      window.clearTimeout(b._t);
+      b._t = window.setTimeout(function () { label.textContent = b.dataset.label; b.classList.remove('copied'); }, 2400);
     }, function () {});
   });
+  /* pictures stay on the card: nothing can be dragged out, and nothing dropped in */
+  document.addEventListener('dragstart', function (e) { e.preventDefault(); });
+  window.addEventListener('dragover', function (e) { e.preventDefault(); });
+  window.addEventListener('drop', function (e) { e.preventDefault(); });
   if (prevBtn) prevBtn.addEventListener('click', function () { go(-1); });
   if (verso) verso.addEventListener('click', function () { go(-1); });
   if (nextBtn) nextBtn.addEventListener('click', function () { go(1); });

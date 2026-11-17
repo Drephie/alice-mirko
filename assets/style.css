@@ -34,6 +34,10 @@
 *, *::before, *::after { box-sizing: border-box; }
 
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+/* a fixed card, not a web page: no text selection, no long-press menus, no dragging pictures, no rubber-band scroll */
+.js, .js body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+.js body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+img, svg { -webkit-user-drag: none; }
 html, body { overflow-x: hidden; overflow-x: clip; }
 
 body {
@@ -336,24 +340,30 @@ img { display: block; max-width: 100%; height: auto; }
 }
 .p-rsvp .note { opacity: 0.85; }
 /* bank details for guests who wish to give */
-.iban { margin-top: calc(3 * var(--u)) !important; display: grid; justify-items: center; gap: calc(1.6 * var(--u)); }
-.iban-code {
-  font-weight: 500; font-size: max(12px, calc(3.4 * var(--u)));
-  letter-spacing: 0.08em; word-spacing: 0.1em;
-  -webkit-user-select: all; user-select: all;      /* one tap selects the whole IBAN */
+.iban { margin-top: calc(3 * var(--u)) !important; display: grid; justify-items: center; gap: calc(2.2 * var(--u)); }
+.iban-box {
+  margin: 0; display: grid; justify-items: center; gap: calc(1.2 * var(--u));
+  padding: calc(2.4 * var(--u)) calc(4.5 * var(--u));
+  border: 1px solid rgba(185, 167, 133, 0.7); background: rgba(255, 255, 255, 0.32);
 }
+.iban-code { font-weight: 500; font-size: max(12px, calc(3.4 * var(--u))); letter-spacing: 0.08em; word-spacing: 0.1em; }
 .iban-holder { font-size: max(var(--fc), calc(2.6 * var(--u))); letter-spacing: 0.12em; text-transform: uppercase; }
-.iban-empty { opacity: 0.5; font-style: italic; letter-spacing: 0.06em; text-transform: none; -webkit-user-select: auto; user-select: auto; }
+.iban-empty { opacity: 0.5; font-style: italic; letter-spacing: 0.06em; text-transform: none; }
 .copy {
-  min-height: 40px; padding: 0 1.3em 0 1.45em;
-  border: 1px solid var(--gold); background: none; color: var(--ink);
-  font: inherit; font-size: max(11px, calc(2.6 * var(--u))); letter-spacing: 0.16em; text-transform: uppercase;
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.7em;
+  min-height: max(44px, calc(10 * var(--u))); min-width: 13em; padding: 0 1.5em 0 1.3em;
+  border: 1px solid var(--ground); background: var(--ground); color: var(--paper);
+  font: inherit; font-size: max(11px, calc(2.9 * var(--u))); letter-spacing: 0.16em; text-transform: uppercase;
   cursor: pointer; -webkit-tap-highlight-color: transparent;
-  transition: background-color 200ms ease, transform 160ms ease-out;
+  transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease, transform 160ms ease-out;
 }
+.copy .i { width: 1.45em; height: 1.45em; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.copy .i-done, .copy.copied .i-copy { display: none; }
+.copy.copied .i-done { display: block; }
+.copy.copied { background: var(--paper); border-color: var(--gold); color: var(--ink); }   /* clearly says it worked */
 .copy:active { transform: scale(0.97); }
 .copy:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
-@media (hover: hover) and (pointer: fine) { .copy:hover { background-color: rgba(185, 167, 133, 0.18); } }
+@media (hover: hover) and (pointer: fine) { .copy:not(.copied):hover { background-color: var(--ground-deep); } }
 
 /* ───────────────────────── Pamphlet ───────────────────────── */
 
