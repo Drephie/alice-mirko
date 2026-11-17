@@ -125,7 +125,7 @@
     var X = 0, Z = 0, i, ang = [], sh = [];
     for (i = 0; i < n; i++) {
       ang[i] = Math.max(0, Math.min(180, base - flex * Math.pow(i / (n - 1), 1.5)));
-      sh[i] = Math.sin(ang[i] * Math.PI / 180) * 0.07;
+      sh[i] = Math.sin(ang[i] * Math.PI / 180) * 0.12;
     }
     for (i = 0; i < n; i++) {
       var al = ang[i], rad = al * Math.PI / 180;

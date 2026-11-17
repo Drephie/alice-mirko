@@ -412,7 +412,8 @@ img { display: block; max-width: 100%; height: auto; }
   content: ""; position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(to left, rgba(40, 38, 24, 0.22), rgba(40, 38, 24, 0.06) 5%, transparent 12%);
 }
-.js.opened .sheet.is-active::before {
+.js.opened .sheet.is-active::before,
+.strip .sheet:not(.flipped)::before {
   content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none;
   background: linear-gradient(to right, rgba(40, 38, 24, 0.2), rgba(40, 38, 24, 0.05) 5%, transparent 11%);
 }
